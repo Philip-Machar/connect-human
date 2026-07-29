@@ -141,7 +141,7 @@ export function PersonSheet({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mt-12 first:mt-0">
+    <div className="mt-14">
       <p className="eyebrow">{title}</p>
       <div className="mt-4">{children}</div>
     </div>
