@@ -14,8 +14,9 @@ export type Stage = "landing" | "onboarding" | "app";
 export type Profile = {
   name: string;
   interests: string[];
-  lookingFor: string[];
-  project: string;
+  meeting: string[];
+  topics: string[];
+  note: string;
 };
 
 export type CreatedEvent = {
@@ -32,17 +33,20 @@ type State = {
   profile: Profile;
   joinedEvent: boolean;
   createdEvent: CreatedEvent | null;
+  /** ids of people whose profile you have opened */
+  met: string[];
 };
 
 const EMPTY: State = {
   stage: "landing",
   tab: "home",
-  profile: { name: "", interests: [], lookingFor: [], project: "" },
+  profile: { name: "", interests: [], meeting: [], topics: [], note: "" },
   joinedEvent: false,
   createdEvent: null,
+  met: [],
 };
 
-const KEY = "icebreaker.state.v1";
+const KEY = "icebreaker.state.v2";
 
 type Ctx = State & {
   ready: boolean;
@@ -51,8 +55,10 @@ type Ctx = State & {
   setTab: (t: Tab) => void;
   joinEvent: () => void;
   setCreatedEvent: (e: CreatedEvent) => void;
+  markMet: (id: string) => void;
   reset: () => void;
 };
+
 
 const StoreContext = createContext<Ctx | null>(null);
 
@@ -103,6 +109,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (createdEvent: CreatedEvent) => setState((s) => ({ ...s, createdEvent })),
     [],
   );
+  const markMet = useCallback(
+    (id: string) =>
+      setState((s) =>
+        s.met.includes(id) ? s : { ...s, met: [id, ...s.met].slice(0, 12) },
+      ),
+    [],
+  );
   const reset = useCallback(() => setState(EMPTY), []);
 
   const value = useMemo(
@@ -114,10 +127,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTab,
       joinEvent,
       setCreatedEvent,
+      markMet,
       reset,
     }),
-    [state, ready, signIn, completeOnboarding, setTab, joinEvent, setCreatedEvent, reset],
+    [
+      state,
+      ready,
+      signIn,
+      completeOnboarding,
+      setTab,
+      joinEvent,
+      setCreatedEvent,
+      markMet,
+      reset,
+    ],
   );
+
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
