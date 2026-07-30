@@ -14,8 +14,9 @@ export type Stage = "landing" | "onboarding" | "app";
 export type Profile = {
   name: string;
   interests: string[];
-  lookingFor: string[];
-  project: string;
+  meeting: string[];
+  topics: string[];
+  note: string;
 };
 
 export type CreatedEvent = {
@@ -32,17 +33,20 @@ type State = {
   profile: Profile;
   joinedEvent: boolean;
   createdEvent: CreatedEvent | null;
+  /** ids of people whose profile you have opened */
+  met: string[];
 };
 
 const EMPTY: State = {
   stage: "landing",
   tab: "home",
-  profile: { name: "", interests: [], lookingFor: [], project: "" },
+  profile: { name: "", interests: [], meeting: [], topics: [], note: "" },
   joinedEvent: false,
   createdEvent: null,
+  met: [],
 };
 
-const KEY = "icebreaker.state.v1";
+const KEY = "icebreaker.state.v2";
 
 type Ctx = State & {
   ready: boolean;
@@ -51,8 +55,10 @@ type Ctx = State & {
   setTab: (t: Tab) => void;
   joinEvent: () => void;
   setCreatedEvent: (e: CreatedEvent) => void;
+  markMet: (id: string) => void;
   reset: () => void;
 };
+
 
 const StoreContext = createContext<Ctx | null>(null);
 
