@@ -19,10 +19,19 @@ export type Person = {
   why: string[];
   /** Ordered nodes for the connection thread: user -> ...nodes... -> person */
   thread: string[];
+  /** What they'd enjoy talking about today. */
+  topics?: string[];
+  /** A one-line note they left before saying hello. */
+  note?: string;
+  /** Optional current mood. */
+  mood?: string;
+  /** Openers the assistant can suggest. */
+  starters?: string[];
 };
 
 const p = (g: "men" | "women", n: number) =>
   `https://randomuser.me/api/portraits/${g}/${n}.jpg`;
+
 
 export const ATTENDEES: Person[] = [
   {
