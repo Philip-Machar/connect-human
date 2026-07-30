@@ -1,12 +1,23 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
-import { INTEREST_OPTIONS, LOOKING_FOR_OPTIONS } from "@/data/attendees";
+import { useMemo, useState } from "react";
+import {
+  INTEREST_OPTIONS,
+  MEETING_OPTIONS,
+  NOTE_PLACEHOLDERS,
+  TOPIC_OPTIONS,
+} from "@/data/attendees";
 import { useStore, type Profile } from "@/lib/store";
-import { ActionButton, Chip } from "./primitives";
+import { ActionButton, ChipField } from "./primitives";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const questions = ["What's your name?", "Choose your interests", "What are you looking for?", "What are you building?"];
+const QUESTIONS = [
+  { q: "What's your name?", aside: "So people know who said hello." },
+  { q: "What are you into lately?", aside: "Pick a few. Add your own." },
+  { q: "Who are you hoping to meet today?", aside: "Be honest. It works better." },
+  { q: "What would you enjoy talking about?", aside: "This is what breaks the ice." },
+  { q: "Anything people should know before saying hello?", aside: "Optional, but it helps." },
+];
 
 export function Onboarding() {
   const { completeOnboarding } = useStore();
@@ -15,26 +26,33 @@ export function Onboarding() {
   const [profile, setProfile] = useState<Profile>({
     name: "",
     interests: [],
-    lookingFor: [],
-    project: "",
+    meeting: [],
+    topics: [],
+    note: "",
   });
 
-  const toggle = (key: "interests" | "lookingFor", v: string) =>
-    setProfile((p) => ({
-      ...p,
-      [key]: p[key].includes(v) ? p[key].filter((x) => x !== v) : [...p[key], v],
-    }));
+  const placeholder = useMemo(
+    () => NOTE_PLACEHOLDERS[Math.floor(Math.random() * NOTE_PLACEHOLDERS.length)],
+    [],
+  );
 
   const canAdvance =
     (step === 0 && profile.name.trim().length > 1) ||
     (step === 1 && profile.interests.length > 0) ||
-    (step === 2 && profile.lookingFor.length > 0) ||
-    (step === 3 && profile.project.trim().length > 2);
+    (step === 2 && profile.meeting.length > 0) ||
+    (step === 3 && profile.topics.length > 0) ||
+    step === 4;
+
+  const last = step === QUESTIONS.length - 1;
 
   const next = () => {
     if (!canAdvance) return;
-    if (step === 3) {
-      completeOnboarding({ ...profile, name: profile.name.trim() });
+    if (last) {
+      completeOnboarding({
+        ...profile,
+        name: profile.name.trim(),
+        note: profile.note.trim(),
+      });
       return;
     }
     setDir(1);
@@ -47,37 +65,70 @@ export function Onboarding() {
     setStep((s) => s - 1);
   };
 
+  const progress = (step + (canAdvance ? 1 : 0.35)) / QUESTIONS.length;
+
   return (
-    <div className="relative flex min-h-dvh flex-col px-6 pt-10 pb-12 sm:px-10">
-      <div className="mx-auto flex w-full max-w-3xl items-center gap-2">
-        {questions.map((_, i) => (
+    <div className="grain relative flex min-h-dvh flex-col overflow-hidden px-6 pt-10 pb-12 sm:px-10">
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 left-1/2 size-[70vmax] -translate-x-1/2 rounded-full"
+        style={{
+          background:
+            "radial-gradient(closest-side, color-mix(in oklab, var(--primary) 9%, transparent), transparent)",
+        }}
+        animate={{ opacity: [0.5, 0.85, 0.5] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* progress */}
+      <div className="relative mx-auto w-full max-w-3xl">
+        <div className="flex items-center justify-between">
+          <p className="eyebrow">
+            {String(step + 1).padStart(2, "0")} — {QUESTIONS.length}
+          </p>
+          <p className="font-mono text-[0.7rem] text-muted-foreground/60">
+            {Math.round(progress * 100)}%
+          </p>
+        </div>
+        <div className="mt-3 h-px w-full bg-border">
           <motion.div
-            key={i}
-            className="h-px flex-1 origin-left bg-border"
-            animate={{
-              backgroundColor:
-                i <= step ? "var(--primary)" : "color-mix(in oklab, white 10%, transparent)",
-            }}
-            transition={{ duration: 0.6, ease }}
+            className="h-px origin-left bg-primary"
+            animate={{ scaleX: progress }}
+            initial={{ scaleX: 0 }}
+            transition={{ duration: 0.9, ease }}
           />
-        ))}
+        </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-3xl flex-1 items-center">
+      <div className="relative mx-auto flex w-full max-w-3xl flex-1 items-center">
         <AnimatePresence mode="wait" custom={dir}>
           <motion.div
             key={step}
             custom={dir}
-            initial={{ opacity: 0, y: dir * 24, filter: "blur(10px)" }}
+            initial={{ opacity: 0, y: dir * 26, filter: "blur(12px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: dir * -24, filter: "blur(10px)" }}
+            exit={{ opacity: 0, y: dir * -26, filter: "blur(12px)" }}
             transition={{ duration: 0.65, ease }}
-            className="w-full py-16"
+            className="w-full py-14"
           >
-            <p className="eyebrow">Step {step + 1} of 4</p>
-            <h2 className="display-lg mt-5 max-w-xl text-balance">{questions[step]}</h2>
+            <motion.h2
+              className="display-lg max-w-xl text-balance"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease, delay: 0.05 }}
+            >
+              {QUESTIONS[step].q}
+            </motion.h2>
+            <motion.p
+              className="mt-4 text-[0.95rem] text-muted-foreground/70"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.25 }}
+            >
+              {QUESTIONS[step].aside}
+            </motion.p>
 
-            <div className="mt-12">
+            <div className="mt-14">
               {step === 0 && (
                 <input
                   autoFocus
@@ -85,64 +136,66 @@ export function Onboarding() {
                   onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                   onKeyDown={(e) => e.key === "Enter" && next()}
                   placeholder="Philip"
-                  className="w-full max-w-xl border-b border-border-strong bg-transparent pb-4 text-3xl font-light tracking-[-0.02em] outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-primary sm:text-4xl"
+                  className="w-full max-w-xl border-b border-border-strong bg-transparent pb-4 text-3xl font-light tracking-[-0.02em] outline-none transition-colors placeholder:text-muted-foreground/30 focus:border-primary sm:text-5xl"
                 />
               )}
 
               {step === 1 && (
-                <div className="flex max-w-2xl flex-wrap gap-3">
-                  {INTEREST_OPTIONS.map((o, i) => (
-                    <motion.div
-                      key={o}
-                      initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ delay: 0.06 * i, duration: 0.5, ease }}
-                    >
-                      <Chip
-                        label={o}
-                        selected={profile.interests.includes(o)}
-                        onClick={() => toggle("interests", o)}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
+                <ChipField
+                  options={INTEREST_OPTIONS}
+                  value={profile.interests}
+                  onChange={(interests) => setProfile((p) => ({ ...p, interests }))}
+                  placeholder="Something else you're into…"
+                />
               )}
 
               {step === 2 && (
-                <div className="flex max-w-2xl flex-wrap gap-3">
-                  {LOOKING_FOR_OPTIONS.map((o, i) => (
-                    <motion.div
-                      key={o}
-                      initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ delay: 0.06 * i, duration: 0.5, ease }}
-                    >
-                      <Chip
-                        label={o}
-                        selected={profile.lookingFor.includes(o)}
-                        onClick={() => toggle("lookingFor", o)}
-                      />
-                    </motion.div>
-                  ))}
-                </div>
+                <ChipField
+                  options={MEETING_OPTIONS}
+                  value={profile.meeting}
+                  onChange={(meeting) => setProfile((p) => ({ ...p, meeting }))}
+                  placeholder="Someone else entirely…"
+                />
               )}
 
               {step === 3 && (
-                <input
-                  autoFocus
-                  value={profile.project}
-                  onChange={(e) => setProfile((p) => ({ ...p, project: e.target.value }))}
-                  onKeyDown={(e) => e.key === "Enter" && next()}
-                  placeholder="An AI notetaker for field researchers"
-                  className="w-full max-w-2xl border-b border-border-strong bg-transparent pb-4 text-2xl font-light tracking-[-0.02em] outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-primary sm:text-3xl"
+                <ChipField
+                  options={TOPIC_OPTIONS}
+                  value={profile.topics}
+                  onChange={(topics) => setProfile((p) => ({ ...p, topics }))}
+                  placeholder="Add a topic…"
                 />
+              )}
+
+              {step === 4 && (
+                <div className="max-w-2xl">
+                  <textarea
+                    autoFocus
+                    rows={3}
+                    value={profile.note}
+                    onChange={(e) => setProfile((p) => ({ ...p, note: e.target.value }))}
+                    placeholder={placeholder}
+                    className="w-full resize-none border-b border-border-strong bg-transparent pb-4 text-2xl leading-snug font-light tracking-[-0.02em] outline-none transition-colors placeholder:text-muted-foreground/30 focus:border-primary"
+                  />
+                  <div className="mt-8 flex flex-wrap gap-2">
+                    {NOTE_PLACEHOLDERS.map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setProfile((p) => ({ ...p, note: n }))}
+                        className="focus-ring rounded-full border border-border px-3.5 py-1.5 text-[0.8rem] text-muted-foreground/70 transition-colors hover:border-border-strong hover:text-foreground"
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="mx-auto flex w-full max-w-3xl items-center justify-between">
+      <div className="relative mx-auto flex w-full max-w-3xl items-center justify-between">
         <button
           onClick={back}
           className="focus-ring rounded-full px-2 py-2 text-sm text-muted-foreground transition-opacity hover:text-foreground"
@@ -152,7 +205,7 @@ export function Onboarding() {
         </button>
         <motion.div animate={{ opacity: canAdvance ? 1 : 0.3 }} transition={{ duration: 0.4 }}>
           <ActionButton variant="accent" onClick={next} disabled={!canAdvance}>
-            {step === 3 ? "Create profile" : "Continue"}
+            {last ? "Enter Icebreaker" : "Continue"}
           </ActionButton>
         </motion.div>
       </div>
