@@ -109,6 +109,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (createdEvent: CreatedEvent) => setState((s) => ({ ...s, createdEvent })),
     [],
   );
+  const markMet = useCallback(
+    (id: string) =>
+      setState((s) =>
+        s.met.includes(id) ? s : { ...s, met: [id, ...s.met].slice(0, 12) },
+      ),
+    [],
+  );
   const reset = useCallback(() => setState(EMPTY), []);
 
   const value = useMemo(
@@ -120,10 +127,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTab,
       joinEvent,
       setCreatedEvent,
+      markMet,
       reset,
     }),
-    [state, ready, signIn, completeOnboarding, setTab, joinEvent, setCreatedEvent, reset],
+    [
+      state,
+      ready,
+      signIn,
+      completeOnboarding,
+      setTab,
+      joinEvent,
+      setCreatedEvent,
+      markMet,
+      reset,
+    ],
   );
+
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
