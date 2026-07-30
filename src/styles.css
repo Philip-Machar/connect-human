@@ -150,9 +150,60 @@
   border-radius: var(--radius-2xl);
 }
 
+/* A soft frosted surface. Used sparingly, only where hierarchy needs it. */
+@utility glass-panel {
+  position: relative;
+  border-radius: var(--radius-3xl);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, white 6%, transparent),
+      color-mix(in oklab, white 2%, transparent)
+    );
+  backdrop-filter: blur(28px) saturate(130%);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, white 7%, transparent) inset,
+    0 24px 60px -30px oklch(0 0 0 / 90%);
+}
+
+@utility hairline-top {
+  border-top: 1px solid var(--border);
+}
+
+/* Very quiet film grain, keeps large dark fields from feeling flat. */
+@utility grain {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  }
+}
+
+@utility lift {
+  transition:
+    transform 0.5s var(--ease-out-soft),
+    border-color 0.5s var(--ease-out-soft),
+    background-color 0.5s var(--ease-out-soft);
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
 @utility focus-ring {
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
   }
 }
+
