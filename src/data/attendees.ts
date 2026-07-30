@@ -301,6 +301,141 @@ export const ATTENDEES: Person[] = [
   },
 ];
 
+const ENRICH: Record<
+  string,
+  { topics: string[]; note: string; mood: string; starters: string[] }
+> = {
+  sarah: {
+    topics: ["AI", "Anime", "Startups", "Teaching"],
+    note: "Ask me about Attack on Titan. Or offline evals. Both work.",
+    mood: "Caffeinated and optimistic",
+    starters: [
+      "Ask Sarah what inspired Msomi, her AI tutor project.",
+      "You both mentioned Attack on Titan.",
+      "That might be the easiest way to start the conversation.",
+    ],
+  },
+  tobi: {
+    topics: ["Design", "Photography", "Music", "Hardware"],
+    note: "I will absolutely talk about calendars for far too long.",
+    mood: "Quietly curious",
+    starters: [
+      "Ask Tobi why he thinks calendars are broken.",
+      "You both care deeply about how software feels.",
+      "Design taste is the fastest way into a real conversation.",
+    ],
+  },
+  amara: {
+    topics: ["Programming", "Books", "Fintech"],
+    note: "Always looking for book recommendations.",
+    mood: "Between deploys",
+    starters: [
+      "Ask Amara about the ledger library she open sourced.",
+      "You both read constantly.",
+      "Trade a book recommendation before you trade advice.",
+    ],
+  },
+  kelvin: {
+    topics: ["AI", "Gaming", "Anime", "Animation"],
+    note: "I will show you a spring curve I am unreasonably proud of.",
+    mood: "Third coffee",
+    starters: [
+      "Ask Kelvin about the gesture library he is rewriting again.",
+      "You both watch the same shows.",
+      "Start with anime, end up talking about motion design.",
+    ],
+  },
+  nadia: {
+    topics: ["AI", "Research", "Languages"],
+    note: "Trying to learn Japanese. Slowly.",
+    mood: "Thinking out loud",
+    starters: [
+      "Ask Nadia how she collected 40,000 Sheng sentences.",
+      "You both build with AI, from different ends.",
+      "She mentors first-time founders, so ask directly.",
+    ],
+  },
+  david: {
+    topics: ["Business", "Photography", "Farming"],
+    note: "I am new in town on weekdays, a farmer on weekends.",
+    mood: "Open to long conversations",
+    starters: [
+      "Ask David what he learned selling his first company.",
+      "You both shoot film.",
+      "Cameras are a softer opening than fundraising.",
+    ],
+  },
+  leila: {
+    topics: ["Programming", "Music", "Food"],
+    note: "Ask me about the best lunch spot within walking distance.",
+    mood: "Here for the people",
+    starters: [
+      "Ask Leila how she cut spoilage by eleven percent.",
+      "You both write Python daily.",
+      "She is here for the people, not the pitch.",
+    ],
+  },
+  brian: {
+    topics: ["Photography", "Music", "Travel"],
+    note: "I will take your portrait for free. Just ask.",
+    mood: "Roaming with a camera",
+    starters: [
+      "Ask Brian about the night workers photo essay.",
+      "You both shoot.",
+      "Ask him to take your portrait. He will say yes.",
+    ],
+  },
+  grace: {
+    topics: ["Programming", "Basketball", "Mobile"],
+    note: "Ask me about making apps work on 2G.",
+    mood: "Focused",
+    starters: [
+      "Ask Grace what offline-first actually costs to build.",
+      "You both play basketball.",
+      "Ship talk first, hoops talk after.",
+    ],
+  },
+  yusuf: {
+    topics: ["AI", "Anime", "Gaming", "Startups"],
+    note: "First hackathon. Please say hello first.",
+    mood: "Nervous, in a good way",
+    starters: [
+      "Ask Yusuf about the study-group matcher he launched on campus.",
+      "You both watch Attack on Titan.",
+      "He is looking for a mentor. You could just offer.",
+    ],
+  },
+  chioma: {
+    topics: ["Business", "Music", "Design"],
+    note: "Ask me why distribution beats product. I have slides.",
+    mood: "Ready to talk shop",
+    starters: [
+      "Ask Chioma how the referral engine actually spread.",
+      "You both love the same records.",
+      "Music first, growth tactics second.",
+    ],
+  },
+  samuel: {
+    topics: ["Programming", "Books", "Football"],
+    note: "Love discussing philosophy at 2am. Or Kubernetes.",
+    mood: "Calm as always",
+    starters: [
+      "Ask Samuel about the cloud bill nobody noticed him saving.",
+      "You both hoop.",
+      "He runs infrastructure at scale. Ask what breaks first.",
+    ],
+  },
+};
+
+for (const person of ATTENDEES) {
+  const e = ENRICH[person.id];
+  if (!e) continue;
+  person.topics = e.topics;
+  person.note = e.note;
+  person.mood = e.mood;
+  person.starters = e.starters;
+}
+
 export const TOP_MATCH = ATTENDEES[0];
 
 export const EVENT = {
@@ -313,7 +448,7 @@ export const EVENT = {
   code: "MTCH-2049",
   link: "icebrkr.co/e/mtch-2049",
   date: "Sat, 8 Aug",
-  time: "09:00 — 21:00",
+  time: "09:00 \u2014 21:00",
 };
 
 export const TOP_INTERESTS: { label: string; count: number }[] = [
@@ -338,16 +473,57 @@ export const INTEREST_OPTIONS = [
   "Basketball",
   "Anime",
   "Photography",
-  "Gaming",
   "Reading",
+  "Gaming",
+  "Fitness",
+  "Travel",
   "Music",
+  "Cooking",
+  "Art",
+  "Faith",
+  "Movies",
+  "Books",
   "Design",
+  "Entrepreneurship",
 ];
 
-export const LOOKING_FOR_OPTIONS = [
-  "Networking",
+export const MEETING_OPTIONS = [
   "Friends",
-  "Dating",
-  "Co-founder",
-  "Mentor",
+  "Professionals",
+  "Mentors",
+  "Founders",
+  "Artists",
+  "Gamers",
+  "Church Community",
+  "Students",
+  "Dates",
+  "Networking",
+  "Study Partners",
+  "Collaborators",
 ];
+
+export const TOPIC_OPTIONS = [
+  "AI",
+  "Football",
+  "Travel",
+  "Business",
+  "Music",
+  "Photography",
+  "Movies",
+  "Books",
+  "Startups",
+  "Faith",
+  "Food",
+  "Fitness",
+];
+
+export const NOTE_PLACEHOLDERS = [
+  "Ask me about Formula One.",
+  "I\u2019m new in town.",
+  "Always looking for book recommendations.",
+  "Trying to learn Japanese.",
+  "Love discussing philosophy.",
+];
+
+/** Kept for backwards compatibility with older screens. */
+export const LOOKING_FOR_OPTIONS = MEETING_OPTIONS;
